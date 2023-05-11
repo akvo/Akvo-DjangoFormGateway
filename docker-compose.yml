@@ -1,0 +1,47 @@
+---
+version: "3.9"
+services:
+  db:
+    image: postgres:12-alpine
+    volumes:
+      - ./dev/db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - pg-data:/var/lib/postgresql/data
+      - ./dev/db/script:/script:ro
+    environment:
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+  pgadmin:
+    image: dpage/pgadmin4:5.7
+    environment:
+      - PGADMIN_LISTEN_PORT=5050
+      - PGADMIN_DEFAULT_EMAIL=dev@akvo.org
+      - PGADMIN_DEFAULT_PASSWORD=password
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+      - pg-admin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    ports:
+      - 5050:5050
+  backend:
+    image: python:3.8.5
+    working_dir: /app
+    command: ["./start.sh"]
+    volumes:
+      - ./dev/backend:/app:delegated
+      - ./src/AkvoDjangoFormGateway:/app/AkvoDjangoFormGateway:delegated
+    environment:
+      - TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN
+      - DB_SCHEMA=demo
+      - DB_USER=akvo
+      - DB_PASSWORD=password
+      - DB_HOST=db
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+volumes:
+  pg-data:
+  pg-admin-data:
