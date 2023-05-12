@@ -17,7 +17,7 @@ services:
     command: ["./test.sh"]
     volumes:
       - ./:/app:delegated
-      - ./src/AkvoDjangoFormGateway:/app/AkvoDjangoFormGateway:delegated
+      - ./src/AkvoDjangoFormGateway:/app/dev/backend/AkvoDjangoFormGateway:delegated
     environment:
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
