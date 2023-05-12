@@ -17,5 +17,9 @@ Including another URLconf
 from django.urls import path, include
 
 urlpatterns = [
-    path("api/gateway/", include('AkvoDjangoFormGateway.urls'), name='form_gateway')
+    path(
+        "api/gateway/",
+        include("AkvoDjangoFormGateway.urls"),
+        name="form_gateway",
+    )
 ]
