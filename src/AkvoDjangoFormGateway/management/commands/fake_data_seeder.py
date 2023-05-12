@@ -12,18 +12,9 @@ from AkvoDjangoFormGateway.constants import QuestionTypes
 fake = Faker()
 
 
-def set_answer_data(data, question):
-    name = None
-    value = None
+def set_answer_option(data, question):
     option = None
-
-    if question.type == QuestionTypes.geo:
-        option = data.geo
-    elif question.type == QuestionTypes.text:
-        name = fake.sentence(nb_words=3)
-    elif question.type == QuestionTypes.number:
-        value = fake.random_int(min=10, max=50)
-    elif question.type == QuestionTypes.option:
+    if question.type == QuestionTypes.option:
         option = [
             question.ag_question_question_options.order_by('?').first().name
         ]
@@ -31,8 +22,22 @@ def set_answer_data(data, question):
         option = list(
             question.ag_question_question_options.order_by('?').values_list(
                 'name', flat=True
-            )[0 : fake.random_int(min=1, max=3)]
+            )[0: fake.random_int(min=1, max=3)]
         )
+    return option
+
+
+def set_answer_data(data, question):
+    name = None
+    value = None
+    option = set_answer_option(data, question)
+
+    if question.type == QuestionTypes.geo:
+        option = data.geo
+    elif question.type == QuestionTypes.text:
+        name = fake.sentence(nb_words=3)
+    elif question.type == QuestionTypes.number:
+        value = fake.random_int(min=10, max=50)
     elif question.type == QuestionTypes.photo:
         name = fake.image_url()
     elif question.type == QuestionTypes.date:
