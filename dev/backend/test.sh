@@ -9,12 +9,12 @@ pip check
 echo "Running tests"
 COVERAGE_PROCESS_START=./.coveragerc \
   coverage run --parallel-mode --concurrency=multiprocessing --rcfile=./.coveragerc \
-  manage.py test --verbosity=3
+  manage.py test --shuffle --parallel 4 --verbosity=3
 
 echo "Coverage"
 coverage combine --rcfile=./.coveragerc
 coverage report -m --rcfile=./.coveragerc
 
-if [[ -n "${COVERALLS_REPO_TOKEN:-}" ]] ; then
+if [[ -n "${COVERALLS_REPO_TOKEN:-}" ]]; then
   coveralls
 fi
