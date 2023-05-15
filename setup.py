@@ -60,6 +60,7 @@ setuptools.setup(
     install_requires=[
         'setuptools>=36.2',
         'twilio>=8.2.0',
+        'djangorestframework>=3.12.4',
     ] + INSTALL_PYTHON_REQUIRES,
     extras_require={
         "dev": ["check-manifest"],
