@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from rest_framework import serializers
 from .models import (
     AkvoGatewayForm,
@@ -18,39 +17,21 @@ class ListFormSerializer(serializers.ModelSerializer):
 
 
 class ListOptionSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        result = super(ListOptionSerializer, self).to_representation(instance)
-        return OrderedDict(
-            [(key, result[key]) for key in result if result[key] is not None]
-        )
-
     class Meta:
         model = AkvoGatewayQuestionOption
         fields = ['id', 'name', 'order']
 
 
 class ListQuestionSerializer(serializers.ModelSerializer):
-    option = serializers.SerializerMethodField()
-
     class Meta:
-        model = AkvoGatewayForm
-        fields = ['id', 'name', 'description', 'version']
-
-    def get_option(self, instance: AkvoGatewayQuestion):
-        if instance.type in [
-            QuestionTypes.option,
-            QuestionTypes.multiple_option,
-        ]:
-            return ListOptionSerializer(
-                instance=instance.ag_question_question_options.all(), many=True
-            ).data
-        return None
+        model = AkvoGatewayQuestion
+        fields = ['id', 'form', 'order', 'text']
 
 
 class ListDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = AkvoGatewayData
-        fields = ['id', 'name', 'form', 'geo', 'phone', 'created', 'updated']
+        fields = '__all__'
 
 
 class ListDataAnswerSerializer(serializers.ModelSerializer):
@@ -58,7 +39,30 @@ class ListDataAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AkvoGatewayAnswer
-        fields = ['history', 'question', 'value']
+        fields = ['question', 'value']
 
     def get_value(self, instance: AkvoGatewayAnswer):
         return get_answer_value(instance)
+
+
+class QuestionDefinitionSerializer(serializers.ModelSerializer):
+    question_type = serializers.SerializerMethodField()
+    options = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AkvoGatewayQuestion
+        fields = ['id', 'text', 'required', 'question_type', 'options']
+
+    def get_question_type(self, obj):
+        return QuestionTypes.FieldStr.get(obj.type)
+
+    def get_options(self, instance):
+        options = (
+            [
+                options.name
+                for options in instance.ag_question_question_options.all()
+            ]
+            if instance.ag_question_question_options.count()
+            else None
+        )
+        return options
