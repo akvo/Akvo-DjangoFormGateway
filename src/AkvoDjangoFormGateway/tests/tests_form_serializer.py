@@ -6,6 +6,7 @@ from AkvoDjangoFormGateway.serializers import ListFormSerializer
 class ListFormSerializerTestCase(TestCase):
     def setUp(self):
         self.form_attributes = {
+            'id': 1,
             'name': 'Form #1',
             'description': 'Form #1 description',
         }
@@ -22,3 +23,8 @@ class ListFormSerializerTestCase(TestCase):
         data = self.serializers.data
         self.assertEqual(data['version'], self.form.version)
         self.assertEqual(str(self.form), self.form.name)
+
+    def test_forms_api(self):
+        res = self.client.get("/api/gateway/forms/1/?format=json")
+        res = res.json()
+        self.assertEqual(res["name"], "Form #1")
