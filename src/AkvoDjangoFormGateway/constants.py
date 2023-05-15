@@ -16,3 +16,8 @@ class QuestionTypes:
         photo: 'Photo',
         date: 'Date',
     }
+
+
+class StatusTypes:
+    draft = 1
+    submitted = 2
