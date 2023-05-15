@@ -1,6 +1,5 @@
-import uuid
 from django.db import models
-from .constants import QuestionTypes
+from .constants import QuestionTypes, StatusTypes
 
 
 # Create your models here.
@@ -8,7 +7,6 @@ class AkvoGatewayForm(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, default=None)
     version = models.IntegerField(default=1)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
         return self.name
@@ -30,24 +28,6 @@ class AkvoGatewayQuestion(models.Model):
 
     def __str__(self):
         return self.text
-
-    def to_definition(self):
-        options = (
-            [
-                options.name
-                for options in self.ag_question_question_options.all()
-            ]
-            if self.ag_question_question_options.count()
-            else False
-        )
-        return {
-            'id': self.id,
-            'order': self.order + 1,
-            'text': self.text,
-            'type': QuestionTypes.FieldStr.get(self.type),
-            'required': self.required,
-            'options': options,
-        }
 
     class Meta:
         db_table = 'ag_question'
@@ -79,6 +59,7 @@ class AkvoGatewayData(models.Model):
     )
     geo = models.JSONField(null=True, default=None)
     phone = models.CharField(max_length=25)
+    status = models.IntegerField(default=StatusTypes.draft)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(default=None, null=True)
 
