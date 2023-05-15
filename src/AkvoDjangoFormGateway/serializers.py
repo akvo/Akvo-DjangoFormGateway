@@ -1,3 +1,4 @@
+# from django.
 from rest_framework import serializers
 from .models import (
     AkvoGatewayForm,
@@ -8,6 +9,11 @@ from .models import (
 )
 from .constants import QuestionTypes
 from .utils.functions import get_answer_value
+
+
+class CheckSerializer(serializers.Serializer):
+    id = serializers.IntegerField(default=1)
+    check = serializers.CharField(default="OK")
 
 
 class ListFormSerializer(serializers.ModelSerializer):
