@@ -38,7 +38,9 @@ def seed_questions(form: Forms, questions: list):
             )
 
 
-def seed_form(form: Forms, data: dict):
+def seed_form(
+    self, data: dict, form: Forms = None, test: bool = False
+) -> Forms:
     if not form:
         form = Forms.objects.create(
             id=data["id"],
@@ -46,19 +48,28 @@ def seed_form(form: Forms, data: dict):
             description=data.get("description"),
             version=1,
         )
+        if not test:
+            self.stdout.write(
+                'Form Created | %s V%s' % (form.name, form.version)
+            )
     else:
         form.name = data["form"]
         form.description = data.get("description")
         form.version += 1
         form.save()
+        if not test:
+            self.stdout.write(
+                'Form Updated | %s V%s' % (form.name, form.version)
+            )
+    return form
 
 
 class Command(BaseCommand):
-    help = "Seeder command"
+    help = "Command to insert form from json file to database"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "-t", "--test", nargs="?", const=1, default=False, type=int
+            "-t", "--test", nargs="?", const=1, default=False, type=bool
         )
         parser.add_argument("-f", "--file", nargs="?", type=str)
 
@@ -70,13 +81,8 @@ class Command(BaseCommand):
                 json_form = json.load(json_file)
             for jf in json_form:
                 form = Forms.objects.filter(id=jf["id"]).first()
-                seed_form(form=form, data=jf)
-                seed_questions(form=Forms, questions=jf["questions"])
-            if not test:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        'Successfully seed from :"%s"' % JSON_FILE
-                    )
-                )
+                form = seed_form(self, data=jf, form=form, test=test)
+                if form:
+                    seed_questions(form=form, questions=jf["questions"])
         except Exception as e:
             raise CommandError(e)
