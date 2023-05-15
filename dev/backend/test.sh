@@ -9,7 +9,7 @@ pip check
 echo "Running tests"
 COVERAGE_PROCESS_START=./.coveragerc \
   coverage run --parallel-mode --concurrency=multiprocessing --rcfile=./.coveragerc \
-  manage.py test --shuffle --parallel 4 --verbosity=3
+  manage.py test --verbosity=3
 
 echo "Coverage"
 coverage combine --rcfile=./.coveragerc

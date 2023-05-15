@@ -48,19 +48,13 @@ def seed_form(
             description=data.get("description"),
             version=1,
         )
-        if not test:
-            self.stdout.write(
-                'Form Created | %s V%s' % (form.name, form.version)
-            )
+        self.stdout.write("Form Created | %s V%s" % (form.name, form.version))
     else:
         form.name = data["form"]
         form.description = data.get("description")
         form.version += 1
         form.save()
-        if not test:
-            self.stdout.write(
-                'Form Updated | %s V%s' % (form.name, form.version)
-            )
+        self.stdout.write("Form Updated | %s V%s" % (form.name, form.version))
     return form
 
 

@@ -1,6 +1,7 @@
 from io import StringIO
 from django.test.utils import override_settings
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase
 from AkvoDjangoFormGateway.models import AkvoGatewayForm as Forms
 
@@ -61,3 +62,30 @@ class FormSeederTestCase(TestCase):
         output = self.call_fake_data_seeder_command("-t", True)
         form = Forms.objects.get(name="Form Complaint")
         self.assertIn(output, form.name)
+
+    def test_seeder_raises_command_error(self):
+        invalid_json_file = "./backend/source/forms/invalid.json"
+
+        # Redirect stdout and stderr to StringIO to capture the output
+        out = StringIO()
+        err = StringIO()
+
+        try:
+            call_command(
+                "form_seeder",
+                "--file",
+                invalid_json_file,
+                stdout=out,
+                stderr=err,
+            )
+            self.fail("CommandError was not raised")
+        except CommandError as e:
+            # Assert that the exception was raised
+            self.assertEqual(
+                str(e),
+                f"[Errno 2] No such file or directory: '{invalid_json_file}'",
+            )
+        finally:
+            # Print the captured output for debugging purposes
+            print("stdout:", out.getvalue())
+            print("stderr:", err.getvalue())

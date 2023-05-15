@@ -21,10 +21,11 @@ def get_answer_value(answer: Answers, toString: bool = False):
         QuestionTypes.option,
         QuestionTypes.multiple_option,
     ]:
-        if toString:
-            if answer.options:
-                return "|".join([str(a) for a in answer.options])
-            return None
+        # TODO: Remove if unecessary
+        # if toString:
+        #     if answer.options:
+        #         return "|".join([str(a) for a in answer.options])
+        #     return None
         return answer.options
     elif answer.question.type == QuestionTypes.number:
         return answer.value
@@ -36,13 +37,17 @@ def set_answer_option(data, question):
     option = None
     if question.type == QuestionTypes.option:
         option = [
-            question.ag_question_question_options.order_by('?').first().name
+            question.ag_question_question_options.order_by("?").first().name
         ]
     elif question.type == QuestionTypes.multiple_option:
         option = list(
-            question.ag_question_question_options.order_by('?').values_list(
-                'name', flat=True
-            )[0: fake.random_int(min=1, max=3)]
+            question.ag_question_question_options.order_by("?").values_list(
+                "name", flat=True
+            )[
+                : fake.random_int(
+                    min=2, max=question.ag_question_question_options.count()
+                )
+            ]
         )
     return option
 
@@ -72,7 +77,9 @@ def set_answer_data(data, question):
 
 def add_fake_answers(data: FormData) -> None:
     form = data.form
-    number_of_answered = random.choice([1, 2, 3])
+    number_of_answered = random.choice(
+        form.ag_form_questions.values_list("id", flat=True)
+    )
     for index, question in enumerate(form.ag_form_questions.all()):
         if index < number_of_answered:
             name, value, option = set_answer_data(data, question)

@@ -12,32 +12,32 @@ class AkvoGatewayForm(models.Model):
         return self.name
 
     class Meta:
-        db_table = 'ag_form'
+        db_table = "ag_form"
 
 
 class AkvoGatewayQuestion(models.Model):
     form = models.ForeignKey(
         to=AkvoGatewayForm,
         on_delete=models.CASCADE,
-        related_name='ag_form_questions',
+        related_name="ag_form_questions",
     )
     order = models.BigIntegerField(null=True, default=None)
     text = models.TextField()
     type = models.IntegerField(choices=QuestionTypes.FieldStr.items())
-    required = models.BooleanField(default=True)
+    required = models.BooleanField(null=True, default=True)
 
     def __str__(self):
         return self.text
 
     class Meta:
-        db_table = 'ag_question'
+        db_table = "ag_question"
 
 
 class AkvoGatewayQuestionOption(models.Model):
     question = models.ForeignKey(
         to=AkvoGatewayQuestion,
         on_delete=models.CASCADE,
-        related_name='ag_question_question_options',
+        related_name="ag_question_question_options",
     )
     order = models.BigIntegerField(null=True, default=None)
     code = models.CharField(max_length=255, default=None, null=True)
@@ -47,7 +47,7 @@ class AkvoGatewayQuestionOption(models.Model):
         return self.name
 
     class Meta:
-        db_table = 'ag_option'
+        db_table = "ag_option"
 
 
 class AkvoGatewayData(models.Model):
@@ -55,7 +55,7 @@ class AkvoGatewayData(models.Model):
     form = models.ForeignKey(
         to=AkvoGatewayForm,
         on_delete=models.CASCADE,
-        related_name='ag_form_data',
+        related_name="ag_form_data",
     )
     geo = models.JSONField(null=True, default=None)
     phone = models.CharField(max_length=25)
@@ -67,19 +67,19 @@ class AkvoGatewayData(models.Model):
         return self.name
 
     class Meta:
-        db_table = 'ag_data'
+        db_table = "ag_data"
 
 
 class AkvoGatewayAnswer(models.Model):
     data = models.ForeignKey(
         to=AkvoGatewayData,
         on_delete=models.CASCADE,
-        related_name='ag_data_answer',
+        related_name="ag_data_answer",
     )
     question = models.ForeignKey(
         to=AkvoGatewayQuestion,
         on_delete=models.CASCADE,
-        related_name='ag_question_answer',
+        related_name="ag_question_answer",
     )
     name = models.TextField(null=True, default=None)
     value = models.FloatField(null=True, default=None)
@@ -92,4 +92,4 @@ class AkvoGatewayAnswer(models.Model):
         return self.data.name
 
     class Meta:
-        db_table = 'ag_answer'
+        db_table = "ag_answer"
