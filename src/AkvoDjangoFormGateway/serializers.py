@@ -1,4 +1,3 @@
-# from django.
 from rest_framework import serializers
 from .models import (
     AkvoGatewayForm,
@@ -72,3 +71,8 @@ class QuestionDefinitionSerializer(serializers.ModelSerializer):
             else None
         )
         return options
+
+
+class TwilioSerializer(serializers.Serializer):
+    answer = serializers.CharField(required=True)
+    phone = serializers.CharField(required=True)
