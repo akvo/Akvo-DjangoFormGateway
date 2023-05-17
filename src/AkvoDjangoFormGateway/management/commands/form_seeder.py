@@ -19,7 +19,8 @@ def seed_questions(form: Forms, questions: list):
                 required=q.get("required"),
             )
         else:
-            question.order = q.get("order")
+            if "order" in q:
+                question.order = q["order"]
             question.text = q["question"]
             question.type = getattr(QuestionTypes, q["type"])
             question.required = q.get("required")
