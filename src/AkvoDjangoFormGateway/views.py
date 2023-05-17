@@ -25,13 +25,13 @@ class AkvoFormViewSet(ModelViewSet):
 
 
 class TwilioViewSet(ViewSet):
-    http_method_names = ['post']
+    http_method_names = ["post"]
 
     def create(self, request):
         serializer = TwilioSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        text = serializer.validated_data['answer']
-        phone = serializer.validated_data['phone']
+        text = serializer.validated_data["answer"]
+        phone = serializer.validated_data["phone"]
         feed = Feed()
 
         init, form_id = feed.get_init_survey_session(text=text)
@@ -44,7 +44,6 @@ class TwilioViewSet(ViewSet):
             return Response(message)
 
         if init and not datapoint:
-            message = survey.ag_form_questions.all().first()
             dp_name = f"{survey.id}-{phone}"
             # create new survey session by creating new datapoint
             FormData.objects.create(
@@ -53,16 +52,22 @@ class TwilioViewSet(ViewSet):
                 phone=phone,
                 status=StatusTypes.draft,
             )
+            message = f"{lq.order}. {lq.text}"
             return Response(message)
+
         if datapoint and lq:
             valid_answer = feed.validate_answer(
                 text=text, question=lq, data=datapoint
             )
             if valid_answer:
                 feed.insert_answer(text=text, question=lq, data=datapoint)
-                # show next question
                 nq = feed.get_last_question(data=datapoint)
-                message = nq.text
+                if nq:
+                    # show next question
+                    message = f"{nq.order}. {nq.text}"
+                else:
+                    feed.set_as_completed(data=datapoint)
+                    message = "Thank you!"
             else:
-                message = lq.text
+                message = f"{lq.order}. {lq.text}"
             return Response(message)
