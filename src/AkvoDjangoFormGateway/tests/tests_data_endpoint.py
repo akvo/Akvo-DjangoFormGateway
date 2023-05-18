@@ -33,13 +33,18 @@ class TwilioDataEndpointTestCase(TestCase):
     def test_list_endpoint(self):
         response = client.post("/api/gateway/data/")
         self.assertEqual(response.status_code, 405)
+        res = response.data
 
         response = client.get("/api/gateway/data/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.assertEqual(
-            list(response.data), ["count", "next", "previous", "results"]
+            list(response.data), ["current", "total", "total_page", "data"]
         )
+        res = response.data
+        self.assertEqual(res["total"], 20)
+        self.assertEqual(res["current"], 1)
+        self.assertEqual(res["total_page"], 2)
 
     def test_get_first_10_items(self):
         queryset = FormData.objects.all()[:PER_PAGE]
@@ -47,12 +52,10 @@ class TwilioDataEndpointTestCase(TestCase):
 
         response = client.get("/api/gateway/data/?page=1")
         res = response.data
-        self.assertEqual(res["count"], TOTAL)
-        self.assertEqual(
-            res["next"], "http://testserver/api/gateway/data/?page=2"
-        )
-        self.assertEqual(res["previous"], None)
-        self.assertEqual(res["results"], serializer.data)
+        self.assertEqual(res["total"], 20)
+        self.assertEqual(res["current"], 1)
+        self.assertEqual(res["total_page"], 2)
+        self.assertEqual(res["data"], serializer.data)
 
     def test_get_last_10_items(self):
         queryset = FormData.objects.all()[PER_PAGE:]
@@ -60,17 +63,18 @@ class TwilioDataEndpointTestCase(TestCase):
 
         response = client.get("/api/gateway/data/?page=2")
         res = response.data
-        self.assertEqual(res["results"], serializer.data)
+
+        self.assertEqual(res["total"], 20)
+        self.assertEqual(res["current"], 2)
+        self.assertEqual(res["total_page"], 2)
+        self.assertEqual(res["data"], serializer.data)
 
     def test_pagination_endpoint(self):
         response = client.get("/api/gateway/data/?page=2")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         res = response.data
-        self.assertEqual(res["next"], None)
-        self.assertEqual(
-            res["previous"], "http://testserver/api/gateway/data/"
-        )
+        self.assertEqual(res["current"], 2)
 
     def test_pagination_invalid(self):
         response = client.get("/api/gateway/data/?page=3")
