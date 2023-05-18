@@ -1,4 +1,7 @@
+import json
+import re
 from datetime import datetime
+from twilio.rest import Client
 from .models import (
     AkvoGatewayForm as Forms,
     AkvoGatewayData as FormData,
@@ -8,10 +11,10 @@ from .models import (
 from .constants import QuestionTypes, StatusTypes
 from .utils.validation import (
     is_number,
-    is_alphanumeric,
+    is_valid_string,
     is_date,
     is_valid_geolocation,
-    is_image_string,
+    is_valid_image,
 )
 
 
@@ -28,7 +31,7 @@ class Feed:
         if "#" in text:
             info = str(text).split("#")
             form_id = info[1]
-            init = len(info) == 2 and "READY" in text
+            init = len(info) == 2 and str(info[0]).lower() == "ready"
         return init, form_id
 
     def get_form(self, form_id: int = None, data: FormData = None) -> Forms:
@@ -84,10 +87,14 @@ class Feed:
         return msg
 
     def validate_answer(
-        self, text: str, question: Questions, data: FormData
+        self,
+        text: str,
+        question: Questions,
+        data: FormData,
+        image_type: str = None,
     ) -> None:
         # is alphanumeric by default
-        is_valid = is_alphanumeric(input=text)
+        is_valid = is_valid_string(input=text)
         if question.type == QuestionTypes.number:
             is_valid = is_number(input=text)
         if question.type == QuestionTypes.date:
@@ -95,7 +102,15 @@ class Feed:
         if question.type == QuestionTypes.geo:
             is_valid = is_valid_geolocation(json_string=text)
         if question.type == QuestionTypes.photo:
-            is_valid = is_image_string(image_string=text)
+            is_valid = is_valid_image(image_type=image_type)
+        if question.type in [
+            QuestionTypes.option,
+            QuestionTypes.multiple_option,
+        ]:
+            txt = re.split("[,|]", text)
+            opt = [o.name for o in question.ag_question_question_options.all()]
+            count = len(set(txt).intersection(set(opt)))
+            is_valid = count > 0
         return is_valid
 
     def insert_answer(self, text: str, question: Questions, data: FormData):
@@ -122,3 +137,38 @@ class Feed:
     def set_as_completed(self, data: FormData) -> None:
         data.status = StatusTypes.submitted
         data.save()
+
+    def get_answer_text(
+        self,
+        body: str = None,
+        image_url: str = None,
+        lat: str = None,
+        lng: str = None,
+    ) -> str:
+        text = body
+        if image_url:
+            text = image_url
+        if lat and lng:
+            text = json.dumps(
+                [
+                    lat,
+                    lng,
+                ]
+            )
+        return str(text).lower()
+
+    def send_to_client(
+        self,
+        client: Client,
+        from_number: str,
+        body: str,
+        to_number: str,
+        type: str = "whatsapp",
+    ):
+        valid_number = len(to_number) == 13
+        if valid_number:
+            client.messages.create(
+                from_=f"{type}:+{from_number}",
+                body=body,
+                to=f"{type}:+{to_number}",
+            )
