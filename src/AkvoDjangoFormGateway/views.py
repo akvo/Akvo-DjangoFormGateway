@@ -1,10 +1,15 @@
 from twilio.rest import Client
 from django.conf import settings
+
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import permission_classes
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import (
+    ModelViewSet,
+    ViewSet,
+    GenericViewSet,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from .models import (
     AkvoGatewayForm as Forms,
     AkvoGatewayData as FormData,
@@ -20,8 +25,8 @@ client = Client(account_sid, auth_token)
 
 
 @permission_classes([AllowAny])
-class CheckView(APIView):
-    def get(self, request):
+class CheckView(GenericViewSet):
+    def check(self, request):
         return Response({"message": settings.TWILIO_ACCOUNT_SID})
 
 
@@ -31,9 +36,7 @@ class AkvoFormViewSet(ModelViewSet):
 
 
 class TwilioViewSet(ViewSet):
-    http_method_names = ["post"]
-
-    def create(self, request):
+    def create(self, request, form_instance: Forms = None):
         serializer = TwilioSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         feed = Feed()
@@ -50,9 +53,15 @@ class TwilioViewSet(ViewSet):
             lat=lat,
             lng=lng,
         )
-        init, form_id = feed.get_init_survey_session(text=text)
+        init, form_id = feed.get_init_survey_session(
+            text=text, form=form_instance
+        )
         datapoint = feed.get_draft_datapoint(phone=phone)
-        survey = feed.get_form(form_id=form_id, data=datapoint)
+        survey = (
+            form_instance
+            if form_instance
+            else feed.get_form(form_id=form_id, data=datapoint)
+        )
         lq = feed.get_question(form=survey, data=datapoint)
         message = None
         if text in feed.welcome and not datapoint:
@@ -79,11 +88,13 @@ class TwilioViewSet(ViewSet):
                 if nq:
                     # show next question
                     message = f"{nq.order}. {nq.text}"
+                    message += feed.show_options(question=nq)
                 else:
                     feed.set_as_completed(data=datapoint)
                     message = "Thank you!"
             else:
                 message = f"{lq.order}. {lq.text}"
+                message += feed.show_options(question=lq)
 
         feed.send_to_client(
             client=client,
@@ -92,3 +103,9 @@ class TwilioViewSet(ViewSet):
             to_number=phone,
         )
         return Response(message)
+
+    def instance(self, request, pk=None):
+        queryset = Forms.objects.all()
+        form = get_object_or_404(queryset, pk=pk)
+
+        return self.create(request=request, form_instance=form)
