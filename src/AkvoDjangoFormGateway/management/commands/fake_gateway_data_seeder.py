@@ -13,9 +13,18 @@ class Command(BaseCommand):
         parser.add_argument(
             "-t", "--test", nargs="?", const=False, default=False, type=bool
         )
+        parser.add_argument(
+            "-s",
+            "--submitted",
+            nargs="?",
+            const=False,
+            default=False,
+            type=bool,
+        )
 
     def handle(self, *args, **options):
         test = options.get("test")
         repeat = options.get("repeat")
+        submitted = options.get("submitted")
         FormData.objects.all().delete()
-        seed_data(repeat=repeat, test=test)
+        seed_data(repeat=repeat, test=test, submitted=submitted)

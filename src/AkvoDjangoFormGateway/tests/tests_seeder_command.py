@@ -8,10 +8,10 @@ from AkvoDjangoFormGateway.models import AkvoGatewayForm as Forms
 
 @override_settings(USE_TZ=False)
 class FormSeederTestCase(TestCase):
-    def call_form_seeder_command(self, *args, **kwargs):
+    def call_gateway_form_seeder_command(self, *args, **kwargs):
         out = StringIO()
         call_command(
-            "form_seeder",
+            "gateway_form_seeder",
             *args,
             stdout=out,
             stderr=StringIO(),
@@ -19,10 +19,10 @@ class FormSeederTestCase(TestCase):
         )
         return out.getvalue()
 
-    def call_fake_data_seeder_command(self, *args, **kwargs):
+    def call_fake_gateway_data_seeder_command(self, *args, **kwargs):
         out = StringIO()
         call_command(
-            "fake_data_seeder",
+            "fake_gateway_data_seeder",
             *args,
             stdout=out,
             stderr=StringIO(),
@@ -34,7 +34,7 @@ class FormSeederTestCase(TestCase):
         forms = Forms.objects.all().delete()
         json_forms = ["Form Complaint"]
         # RUN SEED NEW FORM
-        output = self.call_form_seeder_command(
+        output = self.call_gateway_form_seeder_command(
             "-f", "./backend/source/forms/1.json"
         )
         if output:
@@ -48,7 +48,7 @@ class FormSeederTestCase(TestCase):
             )
             self.assertIn(form.name, json_forms)
         # RUN UPDATE EXISTING FORM
-        output = self.call_form_seeder_command(
+        output = self.call_gateway_form_seeder_command(
             "-f", "./backend/source/forms/1.json"
         )
         if output:
@@ -59,7 +59,7 @@ class FormSeederTestCase(TestCase):
                     f"Form Updated | {form.name} V{form.version}", output
                 )
         # RUN FAKE DATA SEEDER
-        output = self.call_fake_data_seeder_command("-t", True)
+        output = self.call_fake_gateway_data_seeder_command("-t", True)
         form = Forms.objects.get(name="Form Complaint")
         self.assertIn(output, form.name)
 
@@ -68,7 +68,7 @@ class FormSeederTestCase(TestCase):
         err = StringIO()
         first_version = "./backend/source/forms/1.json"
         call_command(
-            "form_seeder",
+            "gateway_form_seeder",
             "--file",
             first_version,
             stdout=out,
@@ -80,7 +80,7 @@ class FormSeederTestCase(TestCase):
         err = StringIO()
         second_version = "./backend/source/forms/1-update-test.json"
         call_command(
-            "form_seeder",
+            "gateway_form_seeder",
             "--file",
             second_version,
             stdout=out,
@@ -97,7 +97,7 @@ class FormSeederTestCase(TestCase):
 
         try:
             call_command(
-                "form_seeder",
+                "gateway_form_seeder",
                 "--file",
                 invalid_json_file,
                 stdout=out,

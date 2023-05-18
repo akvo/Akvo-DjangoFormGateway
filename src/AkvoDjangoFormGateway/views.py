@@ -10,11 +10,17 @@ from rest_framework.viewsets import (
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from .models import (
     AkvoGatewayForm as Forms,
     AkvoGatewayData as FormData,
 )
-from .serializers import ListFormSerializer, TwilioSerializer
+from .serializers import (
+    ListFormSerializer,
+    TwilioSerializer,
+    ListDataSerializer,
+    DetailDataSerializer,
+)
 from .constants import StatusTypes
 from .feed import Feed
 
@@ -109,3 +115,31 @@ class TwilioViewSet(ViewSet):
         form = get_object_or_404(queryset, pk=pk)
 
         return self.create(request=request, form_instance=form)
+
+
+class DataModelPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return Response(
+            {
+                "current": self.page.number,
+                "total": self.page.paginator.count,
+                "total_page": self.page.paginator.num_pages,
+                "data": data,
+            }
+        )
+
+
+class DataViewSet(ModelViewSet):
+    queryset = FormData.objects.all()
+    serializer_class = ListDataSerializer
+    pagination_class = DataModelPagination
+
+    def retrieve(self, request, pk=None):
+        queryset = FormData.objects.filter(status=StatusTypes.submitted)
+        datapoint = get_object_or_404(queryset, pk=pk)
+        serializer = DetailDataSerializer(datapoint)
+        return Response(serializer.data)

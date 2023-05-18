@@ -64,7 +64,7 @@ def set_answer_data(data, question):
         name = fake.date_between_dates(
             date_start=timezone.datetime.now().date() - timedelta(days=90),
             date_end=timezone.datetime.now().date(),
-        ).strftime("%m/%d/%Y")
+        ).strftime("%d-%m-%Y")
     else:
         pass
     return name, value, option
@@ -87,7 +87,7 @@ def add_fake_answers(data: FormData) -> None:
             )
 
 
-def seed_data(repeat: int, test: bool = False):
+def seed_data(repeat: int, test: bool = False, submitted: bool = False):
     for form in Forms.objects.all():
         if not test:
             print(f"\nSeeding - {form.name}")
@@ -109,6 +109,9 @@ def seed_data(repeat: int, test: bool = False):
             data.save()
             add_fake_answers(data)
             number_of_answered = Answers.objects.filter(data=data.id).count()
+            if submitted:
+                data.status = StatusTypes.submitted
+                data.save()
             if len(form.ag_form_questions.all()) == number_of_answered:
                 data.status = StatusTypes.submitted
                 data.save()
