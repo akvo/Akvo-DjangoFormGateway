@@ -1,3 +1,4 @@
+from twilio.rest import Client
 from django.conf import settings
 from rest_framework.decorators import permission_classes
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -11,6 +12,11 @@ from .models import (
 from .serializers import ListFormSerializer, TwilioSerializer
 from .constants import StatusTypes
 from .feed import Feed
+
+account_sid = settings.TWILIO_ACCOUNT_SID
+auth_token = settings.TWILIO_AUTH_TOKEN
+from_number = settings.TWILIO_PHONE_NUMBER
+client = Client(account_sid, auth_token)
 
 
 @permission_classes([AllowAny])
@@ -30,18 +36,27 @@ class TwilioViewSet(ViewSet):
     def create(self, request):
         serializer = TwilioSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        text = serializer.validated_data["answer"]
-        phone = serializer.validated_data["phone"]
         feed = Feed()
 
+        image_type = serializer.validated_data.get("MediaContentType0")
+        image_url = serializer.validated_data.get("MediaUrl0")
+        phone = serializer.data.get("phone")
+        body = serializer.validated_data.get("Body")
+        lat = serializer.validated_data.get("Latitude")
+        lng = serializer.validated_data.get("Longitude")
+        text = feed.get_answer_text(
+            body=body,
+            image_url=image_url,
+            lat=lat,
+            lng=lng,
+        )
         init, form_id = feed.get_init_survey_session(text=text)
         datapoint = feed.get_draft_datapoint(phone=phone)
         survey = feed.get_form(form_id=form_id, data=datapoint)
         lq = feed.get_question(form=survey, data=datapoint)
-
+        message = None
         if text in feed.welcome and not datapoint:
             message = feed.get_list_form()
-            return Response(message)
 
         if init and not datapoint:
             dp_name = f"{survey.id}-{phone}"
@@ -53,11 +68,10 @@ class TwilioViewSet(ViewSet):
                 status=StatusTypes.draft,
             )
             message = f"{lq.order}. {lq.text}"
-            return Response(message)
 
         if datapoint and lq:
             valid_answer = feed.validate_answer(
-                text=text, question=lq, data=datapoint
+                text=text, question=lq, data=datapoint, image_type=image_type
             )
             if valid_answer:
                 feed.insert_answer(text=text, question=lq, data=datapoint)
@@ -70,4 +84,11 @@ class TwilioViewSet(ViewSet):
                     message = "Thank you!"
             else:
                 message = f"{lq.order}. {lq.text}"
-            return Response(message)
+
+        feed.send_to_client(
+            client=client,
+            from_number=from_number,
+            body=message,
+            to_number=phone,
+        )
+        return Response(message)
