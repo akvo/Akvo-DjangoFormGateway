@@ -15,17 +15,12 @@ from AkvoDjangoFormGateway.constants import QuestionTypes, StatusTypes
 fake = Faker()
 
 
-def get_answer_value(answer: Answers, toString: bool = False):
+def get_answer_value(answer: Answers):
     if answer.question.type in [
         QuestionTypes.geo,
         QuestionTypes.option,
         QuestionTypes.multiple_option,
     ]:
-        # TODO: Remove if unecessary
-        # if toString:
-        #     if answer.options:
-        #         return "|".join([str(a) for a in answer.options])
-        #     return None
         return answer.options
     elif answer.question.type == QuestionTypes.number:
         return answer.value
