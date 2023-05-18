@@ -1,5 +1,4 @@
 import json
-import re
 from datetime import datetime
 from twilio.rest import Client
 from .models import (
@@ -25,10 +24,10 @@ class Feed:
     def __init__(self):
         self.welcome = ["hi", "hello", "info"]
 
-    def get_init_survey_session(self, text: str):
+    def get_init_survey_session(self, text: str, form: Forms = None):
         init = False
-        form_id = None
-        if "#" in text:
+        form_id = form.id if form else None
+        if "#" in text and not form:
             info = str(text).split("#")
             form_id = info[1]
             init = len(info) == 2 and str(info[0]).lower() == "ready"
@@ -107,9 +106,12 @@ class Feed:
             QuestionTypes.option,
             QuestionTypes.multiple_option,
         ]:
-            txt = re.split("[,|]", text)
-            opt = [o.name for o in question.ag_question_question_options.all()]
-            count = len(set(txt).intersection(set(opt)))
+            lto = [str(o).lower() for o in str(text).split(",")]
+            opt = [
+                str(o.name).lower()
+                for o in question.ag_question_question_options.all()
+            ]
+            count = len(set(lto).intersection(set(opt)))
             is_valid = count > 0
         return is_valid
 
@@ -124,6 +126,12 @@ class Feed:
         if question.type == QuestionTypes.date:
             dv = datetime.strptime(text)
             name = dv.strftime("%m/%d/%Y")
+        if question.type in [
+            QuestionTypes.option,
+            QuestionTypes.multiple_option,
+        ]:
+            lto = str(text).split(",")
+            options = json.dumps(lto)
         if not name and not value and not options:
             name = text
         return Answers.objects.create(
@@ -172,3 +180,19 @@ class Feed:
                 body=body,
                 to=f"{type}:+{to_number}",
             )
+
+    def show_options(self, question: Questions) -> str:
+        text = ""
+        if question.type in [
+            QuestionTypes.option,
+            QuestionTypes.multiple_option,
+        ]:
+            text += "\n"
+            for opt in question.ag_question_question_options.all():
+                text += f"- {opt.name}\n"
+            if question.type == QuestionTypes.multiple_option:
+                text += (
+                    "\nYou can select more than one separated by commas. *eg:"
+                    " op1,op2*"
+                )
+        return text
