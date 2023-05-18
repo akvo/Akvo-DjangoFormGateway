@@ -49,6 +49,12 @@
           { "name": "multi 3" }
         ],
         "type": "multiple_option"
+      },
+      {
+        "id": 7,
+        "question": "Date Question",
+        "order": 7,
+        "type": "date"
       }
     ]
   }

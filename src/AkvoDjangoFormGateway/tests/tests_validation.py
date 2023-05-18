@@ -15,7 +15,7 @@ class UtilsValidationTestCase(TestCase):
             "text": "Call +6281393",
             "number": "123",
             "image_type": "image/png",
-            "date": "2022-05-17",
+            "date": "17-5-2022",
         }
 
     def test_is_valid_alphanumeric(self):
@@ -49,7 +49,7 @@ class UtilsValidationTestCase(TestCase):
         self.assertEqual(res, True)
 
     def test_is_invalid_date(self):
-        res = is_date(input="21/1/2022")
+        res = is_date(input="2022-12-3")
         self.assertEqual(res, False)
 
     def test_is_valid_image(self):

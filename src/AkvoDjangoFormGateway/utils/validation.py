@@ -1,5 +1,6 @@
 import re
 import json
+from datetime import datetime
 
 
 def is_number(input: str) -> bool:
@@ -8,8 +9,12 @@ def is_number(input: str) -> bool:
 
 
 def is_date(input: str) -> bool:
-    pattern = r"^\d{4}-\d{2}-\d{2}$"
-    return bool(re.match(pattern, input))
+    try:
+        date_format = "%d-%m-%Y"
+        datetime.strptime(input, date_format)
+    except ValueError:
+        return False
+    return True
 
 
 def is_valid_geolocation(json_string: str):

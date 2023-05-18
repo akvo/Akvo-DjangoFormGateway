@@ -124,14 +124,14 @@ class Feed:
         if question.type == QuestionTypes.geo:
             options = text
         if question.type == QuestionTypes.date:
-            dv = datetime.strptime(text)
-            name = dv.strftime("%m/%d/%Y")
+            date_format = "%d-%m-%Y"
+            dv = datetime.strptime(text, date_format)
+            name = dv.strftime(date_format)
         if question.type in [
             QuestionTypes.option,
             QuestionTypes.multiple_option,
         ]:
-            lto = str(text).split(",")
-            options = json.dumps(lto)
+            options = [str(t.strip()) for t in text.split(",")]
         if not name and not value and not options:
             name = text
         return Answers.objects.create(
@@ -173,7 +173,7 @@ class Feed:
         to_number: str,
         type: str = "whatsapp",
     ):
-        valid_number = len(to_number) == 13
+        valid_number = len(to_number) > 8
         if valid_number:
             client.messages.create(
                 from_=f"{type}:+{from_number}",

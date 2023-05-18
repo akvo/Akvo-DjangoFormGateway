@@ -1,11 +1,17 @@
 from django.test import TestCase, Client
 from django.core.management import call_command
 from AkvoDjangoFormGateway.feed import Feed
-from AkvoDjangoFormGateway.models import AkvoGatewayQuestion as Questions
+from AkvoDjangoFormGateway.models import (
+    AkvoGatewayQuestion as Questions,
+    AkvoGatewayAnswer as Answers,
+)
 
 client = Client()
 feed = Feed()
-phone_number = "628139350491"
+# Tests
+# consider that 8 digit phone number will
+# skip to send twillio message
+phone_number = "12345678"
 
 
 class TwilioEndpointTestCase(TestCase):
@@ -145,6 +151,52 @@ class TwilioEndpointTestCase(TestCase):
             ),
             True,
         )
+
+        # Multiple option question
+        question = feed.get_question(form=survey, data=datapoint)
+        # Answer Multiple option question
+        reply_text = "multi 1, Multi 2"
+        json_form = {
+            "Body": reply_text,
+            "From": f"whatsapp:+{phone_number}",
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            feed.validate_answer(
+                text=reply_text,
+                question=question,
+                data=datapoint,
+            ),
+            True,
+        )
+        answer = Answers.objects.filter(
+            data=datapoint, question=question
+        ).first()
+        self.assertEqual(answer.options, ["multi 1", "multi 2"])
+
+        # Date question
+        question = feed.get_question(form=survey, data=datapoint)
+        # Answer date question
+        reply_text = "15-12-1999"
+        json_form = {
+            "Body": reply_text,
+            "From": f"whatsapp:+{phone_number}",
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            feed.validate_answer(
+                text=reply_text,
+                question=question,
+                data=datapoint,
+            ),
+            True,
+        )
+        answer = Answers.objects.filter(
+            data=datapoint, question=question
+        ).first()
+        self.assertEqual(answer.name, reply_text)
 
     def test_show_options(self):
         opt_question = Questions.objects.get(pk=5)
