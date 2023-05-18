@@ -68,9 +68,26 @@ class TwilioEndpointTestCase(TestCase):
         question = feed.get_question(form=survey, data=datapoint)
         self.assertEqual(response.json(), f"{question.order}. {question.text}")
 
-        # Answer photo question
+        # Answer wrong photo question no MediaContentType0
         image = "http://twilio.example/image.png"
+        json_form = {
+            "Body": "",
+            "From": f"whatsapp:+{phone_number}",
+            "MediaUrl0": image,
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 400)
+
         image_type = "image/png"
+        json_form = {
+            "Body": "",
+            "From": f"whatsapp:+{phone_number}",
+            "MediaContentType0": image_type,
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 400)
+
+        # Answer right photo question
         json_form = {
             "Body": "",
             "From": f"whatsapp:+{phone_number}",
@@ -92,9 +109,36 @@ class TwilioEndpointTestCase(TestCase):
         # GPS question
         question = feed.get_question(form=survey, data=datapoint)
 
-        # Answer GPS question
+        # Answer Wrong GPS question
         lat = "-9.1161"
+        json_form = {
+            "Body": "",
+            "From": f"whatsapp:+{phone_number}",
+            "Latitude": lat,
+        }
+        text = feed.get_answer_text(
+            body=None,
+            image_url=None,
+            lat=lat,
+        )
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 400)
+
         lng = "10.11"
+        json_form = {
+            "Body": "",
+            "From": f"whatsapp:+{phone_number}",
+            "Longitude": lng,
+        }
+        text = feed.get_answer_text(
+            body=None,
+            image_url=None,
+            lng=lng,
+        )
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 400)
+
+        # Answer GPS question
         json_form = {
             "Body": "",
             "From": f"whatsapp:+{phone_number}",
