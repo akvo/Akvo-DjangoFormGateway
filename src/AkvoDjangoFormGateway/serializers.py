@@ -18,25 +18,25 @@ class CheckSerializer(serializers.Serializer):
 class ListFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = AkvoGatewayForm
-        fields = ['id', 'name', 'description', 'version']
+        fields = ["id", "name", "description", "version"]
 
 
 class ListOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AkvoGatewayQuestionOption
-        fields = ['id', 'name', 'order']
+        fields = ["id", "name", "order"]
 
 
 class ListQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AkvoGatewayQuestion
-        fields = ['id', 'form', 'order', 'text']
+        fields = ["id", "form", "order", "text"]
 
 
 class ListDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = AkvoGatewayData
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ListDataAnswerSerializer(serializers.ModelSerializer):
@@ -44,7 +44,7 @@ class ListDataAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AkvoGatewayAnswer
-        fields = ['question', 'value']
+        fields = ["question", "value"]
 
     def get_value(self, instance: AkvoGatewayAnswer):
         return get_answer_value(instance)
@@ -56,7 +56,7 @@ class QuestionDefinitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AkvoGatewayQuestion
-        fields = ['id', 'text', 'required', 'question_type', 'options']
+        fields = ["id", "text", "required", "question_type", "options"]
 
     def get_question_type(self, obj):
         return QuestionTypes.FieldStr.get(obj.type)
@@ -74,5 +74,47 @@ class QuestionDefinitionSerializer(serializers.ModelSerializer):
 
 
 class TwilioSerializer(serializers.Serializer):
-    answer = serializers.CharField(required=True)
-    phone = serializers.CharField(required=True)
+    Latitude = serializers.CharField(required=False)
+    Longitude = serializers.CharField(required=False)
+    MediaContentType0 = serializers.CharField(required=False)
+    MediaUrl0 = serializers.URLField(required=False)
+    SmsMessageSid = serializers.CharField(required=False)
+    NumMedia = serializers.IntegerField(required=False)
+    ProfileName = serializers.CharField(required=False)
+    SmsSid = serializers.CharField(required=False)
+    WaId = serializers.CharField(required=False)
+    SmsStatus = serializers.CharField(required=False)
+    Body = serializers.CharField(required=False)
+    To = serializers.CharField(required=False)
+    From = serializers.CharField(required=False)
+    NumSegments = serializers.IntegerField(required=False)
+    ReferralNumMedia = serializers.IntegerField(required=False)
+    MessageSid = serializers.CharField(required=False)
+    AccountSid = serializers.CharField(required=False)
+    ApiVersion = serializers.CharField(required=False)
+    phone = serializers.SerializerMethodField()
+
+    def get_phone(self, obj):
+        from_field = obj.get("From", "")
+        if from_field.startswith("whatsapp:"):
+            return from_field[10:]
+        return from_field
+
+    def validate(self, data):
+        if data.get("MediaContentType0") and not data.get("MediaUrl0"):
+            raise serializers.ValidationError(
+                "MediaUrl0 is required when MediaContentType0 is present."
+            )
+        if data.get("MediaUrl0") and not data.get("MediaContentType0"):
+            raise serializers.ValidationError(
+                "MediaContentType0 is required when MediaUrl0 is present."
+            )
+        if not data.get("Latitude") and data.get("Longitude"):
+            raise serializers.ValidationError(
+                "Latitude is required when Longitude is present."
+            )
+        if data.get("Latitude") and not data.get("Longitude"):
+            raise serializers.ValidationError(
+                "Longitude is required when Latitude is present."
+            )
+        return data
