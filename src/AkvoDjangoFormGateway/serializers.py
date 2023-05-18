@@ -34,9 +34,23 @@ class ListQuestionSerializer(serializers.ModelSerializer):
 
 
 class ListDataSerializer(serializers.ModelSerializer):
+    form_name = serializers.SerializerMethodField()
+
     class Meta:
         model = AkvoGatewayData
-        fields = "__all__"
+        fields = [
+            "id",
+            "status",
+            "form_name",
+            "name",
+            "phone",
+            "geo",
+            "created",
+            "updated",
+        ]
+
+    def get_form_name(self, obj):
+        return obj.form.name
 
 
 class ListDataAnswerSerializer(serializers.ModelSerializer):
@@ -118,3 +132,41 @@ class TwilioSerializer(serializers.Serializer):
                 "Longitude is required when Latitude is present."
             )
         return data
+
+
+class DetailAnswerSerializer(serializers.ModelSerializer):
+    value = serializers.SerializerMethodField()
+    question_text = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AkvoGatewayAnswer
+        fields = ["id", "question_text", "value"]
+
+    def get_value(self, instance: AkvoGatewayAnswer):
+        return get_answer_value(instance)
+
+    def get_question_text(self, obj):
+        return obj.question.text
+
+
+class DetailDataSerializer(serializers.ModelSerializer):
+    answers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AkvoGatewayData
+        fields = [
+            "id",
+            "status",
+            "form",
+            "name",
+            "phone",
+            "geo",
+            "created",
+            "updated",
+            "answers",
+        ]
+
+    def get_answers(self, obj):
+        queryset = obj.ag_data_answer.all()
+        serializer = DetailAnswerSerializer(queryset, many=True)
+        return serializer.data
