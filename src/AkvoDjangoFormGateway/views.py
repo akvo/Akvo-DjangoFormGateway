@@ -127,7 +127,7 @@ class DataViewSet(ModelViewSet):
     pagination_class = DataModelPagination
 
     def retrieve(self, request, pk=None):
-        queryset = FormData.objects.all()
+        queryset = FormData.objects.filter(status=StatusTypes.submitted)
         datapoint = get_object_or_404(queryset, pk=pk)
         serializer = DetailDataSerializer(datapoint)
         return Response(serializer.data)

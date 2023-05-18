@@ -26,7 +26,9 @@ class TwilioDataEndpointTestCase(TestCase):
             "-t",
             True,
         )
-        call_command("fake_gateway_data_seeder", "-r", TOTAL, "-t", True)
+        call_command(
+            "fake_gateway_data_seeder", "-r", TOTAL, "-t", True, "-s", True
+        )
 
     def test_list_endpoint(self):
         response = client.post("/api/gateway/data/")
