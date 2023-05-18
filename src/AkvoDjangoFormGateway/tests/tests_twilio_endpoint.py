@@ -17,7 +17,11 @@ phone_number = "12345678"
 class TwilioEndpointTestCase(TestCase):
     def setUp(self):
         call_command(
-            "form_seeder", "-f", "./backend/source/forms/1.json", "-t", True
+            "gateway_form_seeder",
+            "-f",
+            "./backend/source/forms/1.json",
+            "-t",
+            True,
         )
 
     def test_request_type(self):

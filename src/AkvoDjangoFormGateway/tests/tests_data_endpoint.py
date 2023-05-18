@@ -20,9 +20,13 @@ PER_PAGE = 10
 class TwilioDataEndpointTestCase(TestCase):
     def setUp(self):
         call_command(
-            "form_seeder", "-f", "./backend/source/forms/1.json", "-t", True
+            "gateway_form_seeder",
+            "-f",
+            "./backend/source/forms/1.json",
+            "-t",
+            True,
         )
-        call_command("fake_data_seeder", "-r", TOTAL, "-t", True)
+        call_command("fake_gateway_data_seeder", "-r", TOTAL, "-t", True)
 
     def test_list_endpoint(self):
         response = client.post("/api/gateway/data/")
