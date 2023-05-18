@@ -62,15 +62,15 @@ class DataSerializerTestCase(TestCase):
 
     def test_expected_fields_in_data(self):
         data = self.data_serializer.data
-        self.assertCountEqual(
+        self.assertEqual(
             list(data),
             [
                 "id",
-                "name",
-                "form",
-                "geo",
-                "phone",
                 "status",
+                "form_name",
+                "name",
+                "phone",
+                "geo",
                 "created",
                 "updated",
             ],
