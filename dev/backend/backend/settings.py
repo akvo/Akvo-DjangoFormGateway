@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "AkvoDjangoFormGateway"
+    "AkvoDjangoFormGateway",
 ]
 
 MIDDLEWARE = [
@@ -77,13 +77,13 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ["DB_SCHEMA"],
-        'USER': environ["DB_USER"],
-        'PASSWORD': environ["DB_PASSWORD"],
-        'HOST': environ["DB_HOST"],
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": environ["DB_SCHEMA"],
+        "USER": environ["DB_USER"],
+        "PASSWORD": environ["DB_PASSWORD"],
+        "HOST": environ["DB_HOST"],
+        "PORT": "5432",
     }
 }
 
@@ -91,23 +91,29 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [{
-    'NAME':
-        'django.contrib.auth.password_validation'
-        '.UserAttributeSimilarityValidator',
-}, {
-    'NAME':
-        'django.contrib.auth.password_validation'
-        '.MinimumLengthValidator',
-}, {
-    'NAME':
-        'django.contrib.auth.password_validation'
-        '.CommonPasswordValidator',
-}, {
-    'NAME':
-        'django.contrib.auth.password_validation'
-        '.NumericPasswordValidator',
-}]
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation"
+            ".UserAttributeSimilarityValidator"
+        ),
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.MinimumLengthValidator"
+        ),
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.CommonPasswordValidator"
+        ),
+    },
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation.NumericPasswordValidator"
+        ),
+    },
+]
 
 
 # Internationalization
@@ -135,3 +141,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # TWILIO_ACCOUNT
 TWILIO_ACCOUNT_SID = environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = environ.get("TWILIO_PHONE_NUMBER")

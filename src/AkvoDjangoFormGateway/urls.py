@@ -1,11 +1,23 @@
-from django.urls import path, include
-from .views import AkvoFormViewSet, CheckView
+from django.urls import path
+from .views import AkvoFormViewSet, CheckView, TwilioViewSet
 
-from rest_framework.routers import DefaultRouter
 
-router = DefaultRouter()
-router.register(r'forms', AkvoFormViewSet, basename='forms')
 urlpatterns = [
-    path('', include(router.urls)),
-    path('check/', CheckView.as_view()),
+    path("check/", CheckView.as_view({"get": "check"}), name="twilio"),
+    path(
+        "forms/",
+        AkvoFormViewSet.as_view({"get": "list"}),
+        name="twilio",
+    ),
+    path(
+        "forms/<int:pk>/",
+        AkvoFormViewSet.as_view({"get": "retrieve"}),
+        name="twilio",
+    ),
+    path("twilio/", TwilioViewSet.as_view({"post": "create"}), name="twilio"),
+    path(
+        "twilio/<int:pk>/",
+        TwilioViewSet.as_view({"post": "instance"}),
+        name="twilio",
+    ),
 ]

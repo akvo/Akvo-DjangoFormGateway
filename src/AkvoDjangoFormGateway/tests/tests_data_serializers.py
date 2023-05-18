@@ -63,24 +63,22 @@ class DataSerializerTestCase(TestCase):
     def test_expected_fields_in_data(self):
         data = self.data_serializer.data
         self.assertCountEqual(
-            set(data.keys()),
-            set(
-                [
-                    "id",
-                    "name",
-                    "form",
-                    "geo",
-                    "phone",
-                    "status",
-                    "created",
-                    "updated",
-                ]
-            ),
+            list(data),
+            [
+                "id",
+                "name",
+                "form",
+                "geo",
+                "phone",
+                "status",
+                "created",
+                "updated",
+            ],
         )
 
     def test_expected_fields_in_answer(self):
         data = self.answer_serializer.data
-        self.assertCountEqual(set(data.keys()), set(["question", "value"]))
+        self.assertEqual(list(data), ["question", "value"])
         self.assertEqual(str(self.data.first()), self.data.first().name)
 
     def test_value_content_in_answer(self):
