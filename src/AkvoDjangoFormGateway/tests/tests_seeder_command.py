@@ -63,6 +63,31 @@ class FormSeederTestCase(TestCase):
         form = Forms.objects.get(name="Form Complaint")
         self.assertIn(output, form.name)
 
+    def test_updating_form(self):
+        out = StringIO()
+        err = StringIO()
+        first_version = "./backend/source/forms/1.json"
+        call_command(
+            "form_seeder",
+            "--file",
+            first_version,
+            stdout=out,
+            stderr=err,
+        )
+        self.assertEqual(out.getvalue(), "Form Created | Form Complaint V1\n")
+
+        out = StringIO()
+        err = StringIO()
+        second_version = "./backend/source/forms/1-update-test.json"
+        call_command(
+            "form_seeder",
+            "--file",
+            second_version,
+            stdout=out,
+            stderr=err,
+        )
+        self.assertEqual(out.getvalue(), "Form Updated | Form Complaint V2\n")
+
     def test_seeder_raises_command_error(self):
         invalid_json_file = "./backend/source/forms/invalid.json"
 

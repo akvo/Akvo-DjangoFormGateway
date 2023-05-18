@@ -18,6 +18,9 @@ def is_date(input: str) -> bool:
 
 
 def is_valid_geolocation(json_string: str):
+    # This line will be excluded from coverage
+    # since whatsapp already validate the lat long format
+    # pragma: no cover
     try:
         data = json.loads(json_string)
         if isinstance(data, list) and len(data) == 2:
