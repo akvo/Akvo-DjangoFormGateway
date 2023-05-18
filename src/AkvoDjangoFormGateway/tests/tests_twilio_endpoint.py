@@ -1,9 +1,11 @@
 from django.test import TestCase, Client
 from django.core.management import call_command
 from AkvoDjangoFormGateway.feed import Feed
+from AkvoDjangoFormGateway.models import AkvoGatewayQuestion as Questions
 
 client = Client()
 feed = Feed()
+phone_number = "628139350491"
 
 
 class TwilioEndpointTestCase(TestCase):
@@ -22,7 +24,7 @@ class TwilioEndpointTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_welcome_message(self):
-        json_form = {"Body": "hi", "From": "whatsapp:+628139350491"}
+        json_form = {"Body": "hi", "From": f"whatsapp:+{phone_number}"}
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), feed.get_list_form())
@@ -31,24 +33,24 @@ class TwilioEndpointTestCase(TestCase):
         reply_text = "ready#1"
 
         init, form_id = feed.get_init_survey_session(text=reply_text)
-        json_form = {"Body": reply_text, "From": "whatsapp:+628139350491"}
+        json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 200)
 
-        datapoint = feed.get_draft_datapoint(phone="628139350491")
+        datapoint = feed.get_draft_datapoint(phone=phone_number)
         survey = feed.get_form(form_id=form_id, data=datapoint)
         # First question
         question = feed.get_question(form=survey)
         self.assertEqual(response.json(), f"{question.order}. {question.text}")
 
         # datapoint is exist
-        self.assertEqual(datapoint.phone, "628139350491")
+        self.assertEqual(datapoint.phone, phone_number)
         # Form id equal with datapoint
         self.assertEqual(survey.id, datapoint.form.id)
 
         # Answer First question
         reply_text = "text answer"
-        json_form = {"Body": reply_text, "From": "whatsapp:+628139350491"}
+        json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 200)
 
@@ -61,7 +63,7 @@ class TwilioEndpointTestCase(TestCase):
         image_type = "image/png"
         json_form = {
             "Body": "",
-            "From": "whatsapp:+628139350491",
+            "From": f"whatsapp:+{phone_number}",
             "MediaContentType0": image_type,
             "MediaUrl0": image,
         }
@@ -85,7 +87,7 @@ class TwilioEndpointTestCase(TestCase):
         lng = "10.11"
         json_form = {
             "Body": "",
-            "From": "whatsapp:+628139350491",
+            "From": f"whatsapp:+{phone_number}",
             "Latitude": lat,
             "Longitude": lng,
         }
@@ -103,5 +105,95 @@ class TwilioEndpointTestCase(TestCase):
                 question=question,
                 data=datapoint,
             ),
+            True,
+        )
+
+        # Phone question
+        question = feed.get_question(form=survey, data=datapoint)
+        # Answer Phone question
+        reply_text = "0829111"
+        json_form = {
+            "Body": reply_text,
+            "From": f"whatsapp:+{phone_number}",
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            feed.validate_answer(
+                text=reply_text,
+                question=question,
+                data=datapoint,
+            ),
+            True,
+        )
+
+        # Single option question
+        question = feed.get_question(form=survey, data=datapoint)
+        # Answer Single option question
+        reply_text = "optiOn 1"
+        json_form = {
+            "Body": reply_text,
+            "From": f"whatsapp:+{phone_number}",
+        }
+        response = client.post("/api/gateway/twilio/", json_form)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            feed.validate_answer(
+                text=reply_text,
+                question=question,
+                data=datapoint,
+            ),
+            True,
+        )
+
+    def test_show_options(self):
+        opt_question = Questions.objects.get(pk=5)
+        opt_question_output = "\n- option 1\n- option 2\n"
+        self.assertEqual(
+            feed.show_options(question=opt_question), opt_question_output
+        )
+
+        multi_opt_q = Questions.objects.get(pk=6)
+        multi_opt_output = (
+            "\n- multi 1\n- multi 2\n- multi 3\n\nYou can select more than one"
+            " separated by commas. *eg: op1,op2*"
+        )
+        self.assertEqual(
+            feed.show_options(question=multi_opt_q), multi_opt_output
+        )
+
+        non_opt_q = Questions.objects.get(pk=1)
+        self.assertEqual(feed.show_options(question=non_opt_q), "")
+
+    def test_get_init_survey_session(self):
+        test1 = "ready#1"
+        test2 = "#1"
+        test3 = "1"
+        init, form_id = feed.get_init_survey_session(text=test1)
+        self.assertEqual(init, True)
+        init, form_id = feed.get_init_survey_session(text=test2)
+        self.assertEqual(init, False)
+        init, form_id = feed.get_init_survey_session(text=test3)
+        self.assertEqual(init, False)
+
+    def test_instance_request(self):
+        form_id = 1
+
+        json_form = {}
+        response = client.post(
+            f"/api/gateway/twilio/{form_id}/?format=json", json_form
+        )
+        self.assertEqual(response.status_code, 200)
+        # first question shown
+        fq = Questions.objects.filter(form=form_id).order_by("order").first()
+
+        reply_text = "answer first question"
+        json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
+
+        response = client.post(f"/api/gateway/twilio/{form_id}/", json_form)
+        datapoint = feed.get_draft_datapoint(phone=phone_number)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            feed.validate_answer(text=reply_text, question=fq, data=datapoint),
             True,
         )
