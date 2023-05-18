@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AkvoFormViewSet, CheckView, TwilioViewSet
+from .views import AkvoFormViewSet, CheckView, TwilioViewSet, DataViewSet
 
 
 urlpatterns = [
@@ -18,6 +18,16 @@ urlpatterns = [
     path(
         "twilio/<int:pk>/",
         TwilioViewSet.as_view({"post": "instance"}),
+        name="twilio",
+    ),
+    path(
+        "data/",
+        DataViewSet.as_view({"get": "list"}),
+        name="twilio",
+    ),
+    path(
+        "data/<int:pk>/",
+        DataViewSet.as_view({"get": "retrieve"}),
         name="twilio",
     ),
 ]
