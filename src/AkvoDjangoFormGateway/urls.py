@@ -16,7 +16,8 @@ urlpatterns = [
     ),
     path("twilio/", TwilioViewSet.as_view({"post": "create"}), name="twilio"),
     path(
-        "twilio/<int:pk>/",
+        # Twilio recomend to not use extra slash
+        "twilio/<int:pk>",
         TwilioViewSet.as_view({"post": "instance"}),
         name="twilio",
     ),

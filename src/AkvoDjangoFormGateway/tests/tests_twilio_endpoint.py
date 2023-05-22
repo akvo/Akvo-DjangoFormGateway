@@ -284,7 +284,7 @@ class TwilioEndpointTestCase(TestCase):
 
         json_form = {}
         response = client.post(
-            f"/api/gateway/twilio/{form_id}/?format=json", json_form
+            f"/api/gateway/twilio/{form_id}?format=json", json_form
         )
         self.assertEqual(response.status_code, 200)
         # first question shown
@@ -293,7 +293,7 @@ class TwilioEndpointTestCase(TestCase):
         reply_text = "answer first question"
         json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
 
-        response = client.post(f"/api/gateway/twilio/{form_id}/", json_form)
+        response = client.post(f"/api/gateway/twilio/{form_id}", json_form)
         datapoint = feed.get_draft_datapoint(phone=phone_number)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
