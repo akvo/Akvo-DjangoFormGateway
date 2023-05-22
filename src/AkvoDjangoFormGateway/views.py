@@ -27,7 +27,6 @@ from .feed import Feed
 account_sid = settings.TWILIO_ACCOUNT_SID
 auth_token = settings.TWILIO_AUTH_TOKEN
 from_number = settings.TWILIO_PHONE_NUMBER
-client = Client(account_sid, auth_token)
 
 
 @permission_classes([AllowAny])
@@ -102,6 +101,7 @@ class TwilioViewSet(ViewSet):
                 message = f"{lq.order}. {lq.text}"
                 message += feed.show_options(question=lq)
 
+        client = Client(account_sid, auth_token)
         feed.send_to_client(
             client=client,
             from_number=from_number,
