@@ -55,10 +55,14 @@ class ListDataSerializer(serializers.ModelSerializer):
 
 class ListDataAnswerSerializer(serializers.ModelSerializer):
     value = serializers.SerializerMethodField()
+    question_type = serializers.SerializerMethodField()
 
     class Meta:
         model = AkvoGatewayAnswer
-        fields = ["question", "value"]
+        fields = ["question", "question_type", "value"]
+
+    def get_question_type(self, obj):
+        return QuestionTypes.FieldStr.get(obj.question.type)
 
     def get_value(self, instance: AkvoGatewayAnswer):
         return get_answer_value(instance)
