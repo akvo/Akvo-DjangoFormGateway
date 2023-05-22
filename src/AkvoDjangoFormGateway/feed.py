@@ -156,6 +156,7 @@ class Feed:
         text = body
         if image_url:
             text = image_url
+            return text
         if lat and lng:
             text = json.dumps(
                 [

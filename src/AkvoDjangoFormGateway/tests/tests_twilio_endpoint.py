@@ -69,7 +69,7 @@ class TwilioEndpointTestCase(TestCase):
         self.assertEqual(response.json(), f"{question.order}. {question.text}")
 
         # Answer wrong photo question no MediaContentType0
-        image = "http://twilio.example/image.png"
+        image = "http://twilio.example/image/caseSensiT1Ve.png"
         json_form = {
             "Body": "",
             "From": f"whatsapp:+{phone_number}",
@@ -95,6 +95,9 @@ class TwilioEndpointTestCase(TestCase):
             "MediaUrl0": image,
         }
         response = client.post("/api/gateway/twilio/", json_form)
+        stored_image = Answers.objects.filter(question=question).first().name
+        self.assertEqual(image, stored_image)
+        self.assertNotEqual(image.lower(), stored_image)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             feed.validate_answer(
