@@ -49,8 +49,9 @@ class TwilioEndpointTestCase(TestCase):
 
         datapoint = feed.get_draft_datapoint(phone=phone_number)
         survey = feed.get_form(form_id=form_id, data=datapoint)
-        # First question
         question = feed.get_question(form=survey)
+        # First question shown when survey session started
+        # This response related to line code: 47
         self.assertEqual(response.json(), f"{question.order}. {question.text}")
 
         # datapoint is exist
