@@ -249,6 +249,7 @@ class TwilioEndpointTestCase(TestCase):
             data=datapoint, question=question
         ).first()
         self.assertEqual(answer.name, reply_text)
+        self.assertEqual(response.json(), "Thank you!")
 
     def test_show_options(self):
         opt_question = Questions.objects.get(pk=5)
