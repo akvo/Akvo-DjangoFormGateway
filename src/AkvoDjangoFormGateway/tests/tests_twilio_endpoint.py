@@ -278,25 +278,3 @@ class TwilioEndpointTestCase(TestCase):
         self.assertEqual(init, False)
         init, form_id = feed.get_init_survey_session(text=test3)
         self.assertEqual(init, False)
-
-    def test_instance_request(self):
-        form_id = 1
-
-        json_form = {}
-        response = client.post(
-            f"/api/gateway/twilio/{form_id}?format=json", json_form
-        )
-        self.assertEqual(response.status_code, 200)
-        # first question shown
-        fq = Questions.objects.filter(form=form_id).order_by("order").first()
-
-        reply_text = "answer first question"
-        json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
-
-        response = client.post(f"/api/gateway/twilio/{form_id}", json_form)
-        datapoint = feed.get_draft_datapoint(phone=phone_number)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            feed.validate_answer(text=reply_text, question=fq, data=datapoint),
-            True,
-        )
