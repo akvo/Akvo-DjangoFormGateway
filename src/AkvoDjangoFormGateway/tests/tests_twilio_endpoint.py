@@ -5,6 +5,7 @@ from AkvoDjangoFormGateway.models import (
     AkvoGatewayQuestion as Questions,
     AkvoGatewayAnswer as Answers,
 )
+from AkvoDjangoFormGateway.serializers import TwilioSerializer
 
 client = Client()
 feed = Feed()
@@ -78,6 +79,16 @@ class TwilioEndpointTestCase(TestCase):
         }
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "MediaContentType0 is required when MediaUrl0 is present."
+                ]
+            },
+        )
 
         image_type = "image/png"
         json_form = {
@@ -87,6 +98,16 @@ class TwilioEndpointTestCase(TestCase):
         }
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "MediaUrl0 is required when MediaContentType0 is present."
+                ]
+            },
+        )
 
         # Answer right photo question
         json_form = {
@@ -127,6 +148,16 @@ class TwilioEndpointTestCase(TestCase):
         )
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "Longitude is required when Latitude is present."
+                ]
+            },
+        )
 
         lng = "10.11"
         json_form = {
@@ -141,6 +172,16 @@ class TwilioEndpointTestCase(TestCase):
         )
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "Latitude is required when Longitude is present."
+                ]
+            },
+        )
 
         # Answer GPS question
         json_form = {
