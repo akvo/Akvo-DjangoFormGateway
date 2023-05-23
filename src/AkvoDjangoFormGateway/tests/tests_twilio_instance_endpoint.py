@@ -2,11 +2,7 @@ from django.test import TestCase, Client
 from django.core.management import call_command
 from rest_framework import status
 from AkvoDjangoFormGateway.feed import Feed
-from AkvoDjangoFormGateway.models import (
-    AkvoGatewayQuestion as Questions,
-    AkvoGatewayAnswer as Answers,
-)
-from AkvoDjangoFormGateway.serializers import TwilioSerializer
+from AkvoDjangoFormGateway.models import AkvoGatewayQuestion as Questions
 
 client = Client()
 feed = Feed()
