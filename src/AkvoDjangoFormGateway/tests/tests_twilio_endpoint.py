@@ -5,6 +5,7 @@ from AkvoDjangoFormGateway.models import (
     AkvoGatewayQuestion as Questions,
     AkvoGatewayAnswer as Answers,
 )
+from AkvoDjangoFormGateway.serializers import TwilioSerializer
 
 client = Client()
 feed = Feed()
@@ -49,8 +50,9 @@ class TwilioEndpointTestCase(TestCase):
 
         datapoint = feed.get_draft_datapoint(phone=phone_number)
         survey = feed.get_form(form_id=form_id, data=datapoint)
-        # First question
         question = feed.get_question(form=survey)
+        # First question shown when survey session started
+        # This response related to line code: 47
         self.assertEqual(response.json(), f"{question.order}. {question.text}")
 
         # datapoint is exist
@@ -77,6 +79,16 @@ class TwilioEndpointTestCase(TestCase):
         }
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "MediaContentType0 is required when MediaUrl0 is present."
+                ]
+            },
+        )
 
         image_type = "image/png"
         json_form = {
@@ -86,6 +98,16 @@ class TwilioEndpointTestCase(TestCase):
         }
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "MediaUrl0 is required when MediaContentType0 is present."
+                ]
+            },
+        )
 
         # Answer right photo question
         json_form = {
@@ -126,6 +148,16 @@ class TwilioEndpointTestCase(TestCase):
         )
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "Longitude is required when Latitude is present."
+                ]
+            },
+        )
 
         lng = "10.11"
         json_form = {
@@ -140,6 +172,16 @@ class TwilioEndpointTestCase(TestCase):
         )
         response = client.post("/api/gateway/twilio/", json_form)
         self.assertEqual(response.status_code, 400)
+        serializer = TwilioSerializer(data=json_form)
+        self.assertFalse(serializer.is_valid())
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    "Latitude is required when Longitude is present."
+                ]
+            },
+        )
 
         # Answer GPS question
         json_form = {
@@ -248,6 +290,7 @@ class TwilioEndpointTestCase(TestCase):
             data=datapoint, question=question
         ).first()
         self.assertEqual(answer.name, reply_text)
+        self.assertEqual(response.json(), "Thank you!")
 
     def test_show_options(self):
         opt_question = Questions.objects.get(pk=5)
@@ -278,25 +321,3 @@ class TwilioEndpointTestCase(TestCase):
         self.assertEqual(init, False)
         init, form_id = feed.get_init_survey_session(text=test3)
         self.assertEqual(init, False)
-
-    def test_instance_request(self):
-        form_id = 1
-
-        json_form = {}
-        response = client.post(
-            f"/api/gateway/twilio/{form_id}?format=json", json_form
-        )
-        self.assertEqual(response.status_code, 200)
-        # first question shown
-        fq = Questions.objects.filter(form=form_id).order_by("order").first()
-
-        reply_text = "answer first question"
-        json_form = {"Body": reply_text, "From": f"whatsapp:+{phone_number}"}
-
-        response = client.post(f"/api/gateway/twilio/{form_id}", json_form)
-        datapoint = feed.get_draft_datapoint(phone=phone_number)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            feed.validate_answer(text=reply_text, question=fq, data=datapoint),
-            True,
-        )
