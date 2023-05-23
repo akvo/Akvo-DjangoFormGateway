@@ -24,10 +24,10 @@ class Feed:
     def __init__(self):
         self.welcome = ["hi", "hello", "info"]
 
-    def get_init_survey_session(self, text: str, form: Forms = None):
+    def get_init_survey_session(self, text: str):
         init = False
-        form_id = form.id if form else None
-        if "#" in text and not form:
+        form_id = None
+        if "#" in text:
             info = str(text).split("#")
             form_id = info[1]
             init = len(info) == 2 and str(info[0]).lower() == "ready"
