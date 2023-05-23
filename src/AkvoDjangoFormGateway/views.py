@@ -58,9 +58,7 @@ class TwilioViewSet(ViewSet):
             lat=lat,
             lng=lng,
         )
-        init, form_id = feed.get_init_survey_session(
-            text=text, form=form_instance
-        )
+        init, form_id = feed.get_init_survey_session(text=text)
         datapoint = feed.get_draft_datapoint(phone=phone)
         survey = (
             form_instance
@@ -69,15 +67,15 @@ class TwilioViewSet(ViewSet):
         )
         lq = feed.get_question(form=survey, data=datapoint)
         message = None
-        if text in feed.welcome and not datapoint:
+        if text in feed.welcome and not datapoint and not form_instance:
             message = feed.get_list_form()
 
-        if init and not datapoint:
-            dp_name = f"{survey.id}-{phone}"
+        new_datapoint = not datapoint and phone and len(str(phone).strip())
+        init_session = form_instance or init
+        if new_datapoint and init_session:
             # create new survey session by creating new datapoint
             FormData.objects.create(
                 form=survey,
-                name=dp_name,
                 phone=phone,
                 status=StatusTypes.draft,
             )
