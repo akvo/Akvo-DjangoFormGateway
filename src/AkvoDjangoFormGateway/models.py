@@ -67,6 +67,7 @@ class AkvoGatewayData(models.Model):
         return self.name
 
     class Meta:
+        ordering = ["id"]
         db_table = "ag_data"
 
 
