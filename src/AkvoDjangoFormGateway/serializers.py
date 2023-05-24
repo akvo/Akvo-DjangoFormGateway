@@ -141,16 +141,20 @@ class TwilioSerializer(serializers.Serializer):
 class DetailAnswerSerializer(serializers.ModelSerializer):
     value = serializers.SerializerMethodField()
     question_text = serializers.SerializerMethodField()
+    question_type = serializers.SerializerMethodField()
 
     class Meta:
         model = AkvoGatewayAnswer
-        fields = ["id", "question_text", "value"]
+        fields = ["id", "question_text", "question_type", "value"]
 
     def get_value(self, instance: AkvoGatewayAnswer):
         return get_answer_value(instance)
 
     def get_question_text(self, obj):
         return obj.question.text
+
+    def get_question_type(self, obj):
+        return QuestionTypes.FieldStr.get(obj.question.type)
 
 
 class DetailDataSerializer(serializers.ModelSerializer):
