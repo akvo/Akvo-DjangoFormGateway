@@ -35,6 +35,7 @@ services:
       - TWILIO_ACCOUNT_SID
       - TWILIO_AUTH_TOKEN
       - TWILIO_PHONE_NUMBER
+      - GOOGLE_MAPS_API_KEY
       - DB_SCHEMA=demo
       - DB_USER=akvo
       - DB_PASSWORD=password
