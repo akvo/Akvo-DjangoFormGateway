@@ -12,7 +12,8 @@ def geo_service(
         return None
     if latitude and longitude:
         try:
-            url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latitude},{longitude}&key={api_key}"
+            url = "https://maps.googleapis.com/maps/api/geocode/json"
+            url += f"?latlng={latitude},{longitude}&key={api_key}"
             response = requests.get(url)
             res_data = response.json()
             if response.status_code == 200 and res_data["status"] == "OK":
