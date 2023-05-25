@@ -222,3 +222,13 @@ class TwilioInstanceEndpointTestCase(TestCase):
         ).first()
         self.assertEqual(answer.name, reply_text)
         self.assertEqual(response.json(), "Thank you!")
+
+        # Test if second submission get first question
+        reply_text = "hi"
+        response = client.post(
+            f"/api/gateway/twilio/{form_id}?format=json",
+            {"From": f"whatsapp:+{phone_number}", "Body": reply_text},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # No welcome message and select forms
+        self.assertNotEqual(response.json(), feed.get_list_form())
