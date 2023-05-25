@@ -115,14 +115,21 @@ class Feed:
             is_valid = count > 0
         return is_valid
 
-    def insert_answer(self, text: str, question: Questions, data: FormData):
+    def insert_answer(
+        self,
+        text: str,
+        question: Questions,
+        data: FormData,
+        lat: str = None,
+        lng: str = None,
+    ):
         name = None
         value = None
         options = None
         if question.type == QuestionTypes.number:
             value = text
-        if question.type == QuestionTypes.geo:
-            options = text
+        if question.type == QuestionTypes.geo and lat and lng:
+            options = [lat, lng]
         if question.type == QuestionTypes.date:
             date_format = "%d-%m-%Y"
             dv = datetime.strptime(text, date_format)
