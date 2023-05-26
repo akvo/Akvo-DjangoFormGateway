@@ -63,6 +63,7 @@ setuptools.setup(
         "setuptools>=36.2",
         "twilio>=8.2.0",
         "djangorestframework>=3.12.4",
+        "requests==2.26.0",
     ]
     + INSTALL_PYTHON_REQUIRES,
     extras_require={

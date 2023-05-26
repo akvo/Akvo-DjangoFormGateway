@@ -17,11 +17,16 @@ fake = Faker()
 
 def get_answer_value(answer: Answers):
     if answer.question.type in [
-        QuestionTypes.geo,
         QuestionTypes.option,
         QuestionTypes.multiple_option,
     ]:
         return answer.options
+    if answer.question.type == QuestionTypes.geo:
+        return {
+            "lat": answer.options[0],
+            "lng": answer.options[1],
+            "address": answer.name
+        }
     elif answer.question.type == QuestionTypes.number:
         return answer.value
     else:
@@ -70,12 +75,15 @@ def set_answer_data(data, question):
     return name, value, option
 
 
-def add_fake_answers(data: FormData) -> None:
+def add_fake_answers(data: FormData, submitted: bool = False) -> None:
     form = data.form
-    number_of_answered = random.choice(
-        form.ag_form_questions.values_list("id", flat=True)
+    questions = form.ag_form_questions.all()
+    number_of_answered = (
+        questions.count()
+        if submitted
+        else random.choice(form.ag_form_questions.values_list("id", flat=True))
     )
-    for index, question in enumerate(form.ag_form_questions.all()):
+    for index, question in enumerate(questions):
         if index < number_of_answered:
             name, value, option = set_answer_data(data, question)
             Answers.objects.create(
@@ -98,7 +106,7 @@ def seed_data(repeat: int, test: bool = False, submitted: bool = False):
             created = datetime.combine(created, time.min)
             lat = fake.latitude()
             lng = fake.longitude()
-            geo_value = f"{lat},{lng}"
+            geo_value = [float(lat), float(lng)]
             data = FormData.objects.create(
                 form=form,
                 name=fake.pystr_format(),
@@ -107,7 +115,7 @@ def seed_data(repeat: int, test: bool = False, submitted: bool = False):
             )
             data.created = make_aware(created)
             data.save()
-            add_fake_answers(data)
+            add_fake_answers(data=data, submitted=submitted)
             number_of_answered = Answers.objects.filter(data=data.id).count()
             if submitted:
                 data.status = StatusTypes.submitted

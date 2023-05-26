@@ -17,6 +17,7 @@ phone_number = "12345678"
 
 class TwilioEndpointTestCase(TestCase):
     def setUp(self):
+        super().setUp()
         call_command(
             "gateway_form_seeder",
             "-f",
@@ -24,6 +25,9 @@ class TwilioEndpointTestCase(TestCase):
             "-t",
             True,
         )
+
+    def tearDown(self):
+        super().tearDown()
 
     def test_request_type(self):
         # GET not allowed
@@ -206,6 +210,9 @@ class TwilioEndpointTestCase(TestCase):
             ),
             True,
         )
+        # check lat and lng options are not json dumped
+        geo_answer = datapoint.ag_data_answer.filter(question=question).first()
+        self.assertEqual(geo_answer.options, [lat, lng])
 
         # Phone question
         question = feed.get_question(form=survey, data=datapoint)

@@ -23,10 +23,12 @@ from .serializers import (
 )
 from .constants import StatusTypes
 from .feed import Feed
+from .utils.services import store_geo_service
 
 account_sid = settings.TWILIO_ACCOUNT_SID
 auth_token = settings.TWILIO_AUTH_TOKEN
 from_number = settings.TWILIO_PHONE_NUMBER
+google_api_key = settings.GOOGLE_MAPS_API_KEY
 
 
 @permission_classes([AllowAny])
@@ -65,6 +67,7 @@ class TwilioViewSet(ViewSet):
             if form_instance
             else feed.get_form(form_id=form_id, data=datapoint)
         )
+        # get last question
         lq = feed.get_question(form=survey, data=datapoint)
         message = None
         if text in feed.welcome and not datapoint and not form_instance:
@@ -86,7 +89,13 @@ class TwilioViewSet(ViewSet):
                 text=text, question=lq, data=datapoint, image_type=image_type
             )
             if valid_answer:
-                feed.insert_answer(text=text, question=lq, data=datapoint)
+                aw = feed.insert_answer(
+                    text=text, question=lq, data=datapoint, lat=lat, lng=lng
+                )
+                store_geo_service(
+                    answer=aw,
+                    api_key=google_api_key,
+                )
                 nq = feed.get_last_question(data=datapoint)
                 if nq:
                     # show next question
