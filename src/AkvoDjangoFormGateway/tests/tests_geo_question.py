@@ -1,6 +1,6 @@
-import os
 from unittest.mock import patch
 from django.test import TestCase
+from django.conf import settings
 from django.core.management import call_command
 from AkvoDjangoFormGateway.models import (
     AkvoGatewayData as FormData,
@@ -8,6 +8,8 @@ from AkvoDjangoFormGateway.models import (
 )
 from AkvoDjangoFormGateway.constants import QuestionTypes
 from AkvoDjangoFormGateway.utils.services import geo_service, store_geo_service
+
+google_map_api_key = settings.GOOGLE_MAPS_API_KEY
 
 
 class GeoQuestionTestCase(TestCase):
@@ -27,7 +29,6 @@ class GeoQuestionTestCase(TestCase):
             "-s",
             True,
         )
-        self.gmap_api_key = os.environ["GOOGLE_MAPS_API_KEY"]
 
     def tearDown(self):
         # Clean up any resources or data after each test
@@ -37,7 +38,7 @@ class GeoQuestionTestCase(TestCase):
         lat = -7.38984
         lng = 109.4935524
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=google_map_api_key
         )
         self.assertEqual(list(res), ["plus_code", "results", "status"])
         self.assertEqual(res["status"], "OK")
@@ -47,12 +48,11 @@ class GeoQuestionTestCase(TestCase):
         )
 
     def test_geo_service_without_key(self):
-        self.gmap_api_key = None
 
         lat = -7.38984
         lng = 109.4935524
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=None
         )
         self.assertEqual(res, None)
 
@@ -60,7 +60,7 @@ class GeoQuestionTestCase(TestCase):
         lat = -7.38984
         lng = None
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=google_map_api_key
         )
         self.assertEqual(res, None)
 
@@ -68,7 +68,7 @@ class GeoQuestionTestCase(TestCase):
         lat = None
         lng = 109.4935524
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=google_map_api_key
         )
         self.assertEqual(res, None)
 
@@ -76,7 +76,7 @@ class GeoQuestionTestCase(TestCase):
         lat = None
         lng = None
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=google_map_api_key
         )
         self.assertEqual(res, None)
 
@@ -104,7 +104,7 @@ class GeoQuestionTestCase(TestCase):
 
         # formatted_address should not be empty or null
         geo_answer = store_geo_service(
-            answer=geo_answer, api_key=self.gmap_api_key
+            answer=geo_answer, api_key=google_map_api_key
         )
         self.assertNotEqual(geo_answer.name, None)
 
@@ -116,7 +116,7 @@ class GeoQuestionTestCase(TestCase):
         lat = -7.38984
         lng = 109.4935524
         res = geo_service(
-            latitude=lat, longitude=lng, api_key=self.gmap_api_key
+            latitude=lat, longitude=lng, api_key=google_map_api_key
         )
 
         # Assert that the result matches the expected behavior
