@@ -17,11 +17,16 @@ fake = Faker()
 
 def get_answer_value(answer: Answers):
     if answer.question.type in [
-        QuestionTypes.geo,
         QuestionTypes.option,
         QuestionTypes.multiple_option,
     ]:
         return answer.options
+    if answer.question.type == QuestionTypes.geo:
+        return {
+            "lat": answer.options[0],
+            "lng": answer.options[1],
+            "address": answer.name
+        }
     elif answer.question.type == QuestionTypes.number:
         return answer.value
     else:
