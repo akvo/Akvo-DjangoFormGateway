@@ -2,4 +2,4 @@
 A Django library that enables seamless integration of messenger services
 """
 
-__version__ = "0.0.8"
+__version__ = "0.0.9"
