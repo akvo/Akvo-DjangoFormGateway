@@ -105,7 +105,7 @@ python manage.py gateway_form_seeder -f ./your/source/json/form.json
 To generate dummy data for the gateway forms, you can use the following command:
 
 ```bash
-python manage.py fake_gateway_form_seeder -r 100
+python manage.py fake_gateway_data_seeder -r 100
 ```
 
 ### Arguments
