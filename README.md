@@ -191,9 +191,9 @@ This package requires creating a form from a JSON file with the following format
 | -------- | ----------------------------- | ---------------------------------------------------------------- |
 | id       | Integer                       | Unique key to identifying the question                           |
 | question | String                        | question text                                                    |
-| order    | Integer                       | unique number for sorting questions                              |
+| order    | Integer                       | Unique number for sorting questions                              |
 | required | Boolean                       | Set the questions that must be answered. True = Yes, False = No. |
-| type     | Enumeration of question types | Unique key to identify the form                                  |
+| type     | Enumeration of question types | Set the question type based on the expected answer               |
 
 ### Enumeration of question types
 
