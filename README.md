@@ -112,7 +112,7 @@ python manage.py fake_gateway_form_seeder -r 100
 
 | Short | Long     | Description                           |
 | ----- | -------- | ------------------------------------- |
-| -r    | --repeat | Number of populated fake datapoints   |
+| -r    | --repeat | Number of fake datapoints             |
 | -t    | --test   | Optional argument for testing purpose |
 
 ## Geolocation converters
@@ -197,12 +197,12 @@ This package requires creating a form from a JSON file with the following format
 
 ### Enumeration of question types
 
-| Type            | Description                                                                      |
-| --------------- | -------------------------------------------------------------------------------- |
-| geo             | Type of question for geolocation answers                                         |
-| text            | Type of question for free text answers                                           |
-| number          | Type of question for numeric answers                                             |
-| option          | Type of question for single option answers                                       |
-| multiple_option | Type of question for multiple options answers                                    |
-| photo           | Type of question for image answers with the following format: .jpeg, .jpg & .png |
-| date            | Type of question for date answers with the format: DD-MM-YYYY                    |
+| Type            | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| geo             | Type of question for geolocation answers                      |
+| text            | Type of question for free text answers                        |
+| number          | Type of question for numeric answers                          |
+| option          | Type of question for single option answers                    |
+| multiple_option | Type of question for multiple options answers                 |
+| photo           | Type of question for image answers|
+| date            | Type of question for date answers with the format: DD-MM-YYYY |
