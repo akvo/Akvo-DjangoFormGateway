@@ -123,3 +123,86 @@ This command is required when you are migrating from a disabled to an enabled Go
 python manage.py gateway_geo_converter
 ```
 
+# Example
+
+## Routing
+
+To configure the routing with a specific prefix URL (e.g., `api/gateway`), add the corresponding route to your Django project's `urls.py` file.
+
+```python
+
+urlpatterns = [
+    ..., # other url patterns
+    path(
+        r"api/gateway/",
+        include("AkvoDjangoFormGateway.urls"),
+        name="gateway",
+    ),
+]
+```
+
+### Testing
+
+Test the endpoint by running the following command
+
+> Assuming Django is running on port 80
+
+```curl
+curl -X 'GET' \
+  'http://localhost/api/gateway/check/' \
+  -H 'accept: */*'
+```
+
+## JSON Form
+
+This package requires creating a form from a JSON file with the following format:
+
+```json
+[
+  {
+    "id": 1,
+    "form": "Form title",
+    "description": "Form description",
+    "questions": [
+      {
+        "id": 1,
+        "question": "First question",
+        "order": 1,
+        "required": true,
+        "type": "text"
+      }
+    ]
+  }
+]
+```
+
+### Form's fields description
+
+| Field       | Type               | Description                        |
+| ----------- | ------------------ | ---------------------------------- |
+| id          | Integer            | Unique key to identifying the form |
+| form        | String             | Form name                          |
+| description | String             | Form description                   |
+| questions   | Array of questions | List of questions on the form      |
+
+### Question's fields description
+
+| Field    | Type                          | Description                                                      |
+| -------- | ----------------------------- | ---------------------------------------------------------------- |
+| id       | Integer                       | Unique key to identifying the question                           |
+| question | String                        | question text                                                    |
+| order    | Integer                       | unique number for sorting questions                              |
+| required | Boolean                       | Set the questions that must be answered. True = Yes, False = No. |
+| type     | Enumeration of question types | Unique key to identify the form                                  |
+
+### Enumeration of question types
+
+| Type            | Description                                                                      |
+| --------------- | -------------------------------------------------------------------------------- |
+| geo             | Type of question for geolocation answers                                         |
+| text            | Type of question for free text answers                                           |
+| number          | Type of question for numeric answers                                             |
+| option          | Type of question for single option answers                                       |
+| multiple_option | Type of question for multiple options answers                                    |
+| photo           | Type of question for image answers with the following format: .jpeg, .jpg & .png |
+| date            | Type of question for date answers with the format: DD-MM-YYYY                    |
