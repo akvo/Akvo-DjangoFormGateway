@@ -25,3 +25,61 @@ To install AkvoDjangoFormGateway in your Django project, use the following comma
 pip install AkvoDjangoFormGateway
 ```
 
+# Configuration
+
+## Environment file
+
+Create an environment file (`.env`) in your project directory
+
+```bash
+touch .env
+```
+
+and include the following required variables:
+
+```bash
+TWILIO_ACCOUNT_SID="YOUR TWILIO_ACCOUNT_SID"
+TWILIO_AUTH_TOKEN="YOUR TWILIO_AUTH_TOKEN"
+TWILIO_PHONE_NUMBER="YOUR TWILIO_PHONE_NUMBER"
+```
+
+You can also include an optional variable:
+
+```
+GOOGLE_MAPS_API_KEY="YOUR GOOGLE_MAPS_API_KEY"
+```
+
+## Docker
+
+It should be noted, if your django project is located in a docker container then it is highly recommended to add the environment variable to `docker-compose.yml`.
+
+```docker
+---
+version: "3.9"
+services:
+  container-name:
+    ... # other configuration
+    environment: # add it to the environment section
+      - TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN
+      - TWILIO_PHONE_NUMBER
+      - GOOGLE_MAPS_API_KEY
+      - ... # other environment variables
+```
+
+## Django Settings
+
+Add the following configurations to your Django project's `settings.py` file:
+
+```python
+API_APPS = [
+    ..., # other apps
+    "AkvoDjangoFormGateway",
+]
+# Load environment variables
+TWILIO_ACCOUNT_SID = environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = environ.get("TWILIO_PHONE_NUMBER")
+GOOGLE_MAPS_API_KEY = environ.get("GOOGLE_MAPS_API_KEY")
+```
+
