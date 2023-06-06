@@ -123,11 +123,11 @@ This command is required when you are migrating from a disabled to an enabled Go
 python manage.py gateway_geo_converter
 ```
 
-# Example
+## Router
 
-## Routing
+To get the new endpoint provided by AkvoDjangoFormGateway, Add the corresponding route to your Django project's `urls.py` file.
 
-To configure the routing with a specific prefix URL (e.g., `api/gateway`), add the corresponding route to your Django project's `urls.py` file.
+> Assuming the prefix is `api/gateway`
 
 ```python
 
@@ -141,8 +141,6 @@ urlpatterns = [
 ]
 ```
 
-### Testing
-
 Test the endpoint by running the following command
 
 > Assuming Django is running on port 80
@@ -152,6 +150,8 @@ curl -X 'GET' \
   'http://localhost/api/gateway/check/' \
   -H 'accept: */*'
 ```
+
+# Example
 
 ## JSON Form
 
@@ -204,5 +204,5 @@ This package requires creating a form from a JSON file with the following format
 | number          | Type of question for numeric answers                          |
 | option          | Type of question for single option answers                    |
 | multiple_option | Type of question for multiple options answers                 |
-| photo           | Type of question for image answers|
+| photo           | Type of question for image answers                            |
 | date            | Type of question for date answers with the format: DD-MM-YYYY |
