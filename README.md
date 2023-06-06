@@ -83,3 +83,43 @@ TWILIO_PHONE_NUMBER = environ.get("TWILIO_PHONE_NUMBER")
 GOOGLE_MAPS_API_KEY = environ.get("GOOGLE_MAPS_API_KEY")
 ```
 
+# Usage
+
+## Form Seeder
+
+To seed forms into the gateway, use the following command:
+
+```bash
+python manage.py gateway_form_seeder -f ./your/source/json/form.json
+```
+
+### Arguments
+
+| Short | Long   | Description                              |
+| ----- | ------ | ---------------------------------------- |
+| -f    | --file | The path location for the JSON form file |
+| -t    | --test | Optional argument for testing purpose    |
+
+## Dummy data seeder (optional)
+
+To generate dummy data for the gateway forms, you can use the following command:
+
+```bash
+python manage.py fake_gateway_form_seeder -r 100
+```
+
+### Arguments
+
+| Short | Long     | Description                           |
+| ----- | -------- | ------------------------------------- |
+| -r    | --repeat | Number of populated fake datapoints   |
+| -t    | --test   | Optional argument for testing purpose |
+
+## Geolocation converters
+
+This command is required when you are migrating from a disabled to an enabled Google Maps API.
+
+```bash
+python manage.py gateway_geo_converter
+```
+
