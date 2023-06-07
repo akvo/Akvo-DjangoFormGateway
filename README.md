@@ -143,40 +143,19 @@ urlpatterns = [
 
 Test the endpoint by running the following command
 
-> Assuming Django is running on port 80
+> Assuming Django is running on port 8000
 
 ```curl
 curl -X 'GET' \
-  'http://localhost/api/gateway/check/' \
+  'http://localhost:8000/api/gateway/check/' \
   -H 'accept: */*'
 ```
 
-# Example
+# Properties
 
-## JSON Form
+To create a JSON form using AkvoDjangoFormGateway, you need to provide a JSON object that defines the form and its questions. Below are the properties you can use:
 
-This package requires creating a form from a JSON file with the following format:
-
-```json
-[
-  {
-    "id": 1,
-    "form": "Form title",
-    "description": "Form description",
-    "questions": [
-      {
-        "id": 1,
-        "question": "First question",
-        "order": 1,
-        "required": true,
-        "type": "text"
-      }
-    ]
-  }
-]
-```
-
-### Form's fields description
+## Form's fields description
 
 | Field       | Type               | Description                        |
 | ----------- | ------------------ | ---------------------------------- |
@@ -185,7 +164,7 @@ This package requires creating a form from a JSON file with the following format
 | description | String             | Form description                   |
 | questions   | Array of questions | List of questions on the form      |
 
-### Question's fields description
+## Question's fields description
 
 | Field    | Type                          | Description                                                      |
 | -------- | ----------------------------- | ---------------------------------------------------------------- |
@@ -195,7 +174,7 @@ This package requires creating a form from a JSON file with the following format
 | required | Boolean                       | Set the questions that must be answered. True = Yes, False = No. |
 | type     | Enumeration of question types | Set the question type based on the expected answer               |
 
-### Enumeration of question types
+## Question types
 
 | Type            | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
@@ -206,3 +185,78 @@ This package requires creating a form from a JSON file with the following format
 | multiple_option | Type of question for multiple options answers                 |
 | photo           | Type of question for image answers                            |
 | date            | Type of question for date answers with the format: DD-MM-YYYY |
+
+# Example
+
+## Creating a complaint from
+
+To create a complaint form using AkvoDjangoFormGateway, you can follow the JSON form guidelines outlined in the previous section.
+
+```json
+[
+  {
+    "id": 1,
+    "form": "Form Complaint",
+    "description": "Collect complaint data from customers",
+    "questions": [
+      {
+        "id": 1,
+        "question": "Details of the complaint",
+        "order": 1,
+        "required": true,
+        "type": "text"
+      },
+      {
+        "id": 2,
+        "question": "Upload a photo",
+        "order": 2,
+        "required": true,
+        "type": "photo"
+      },
+      {
+        "id": 3,
+        "question": "Your location",
+        "order": 3,
+        "required": true,
+        "type": "geo"
+      }
+    ]
+  }
+]
+```
+
+# Development
+
+## Run Dev Containers
+
+The dev environment contains two containers: Django backend and PostgreSQL db, to run:
+
+```bash
+docker compose up -d
+```
+
+Before go to the next step, wait until the service started at [http://localhost:8000](http://localhost:8000).
+
+## Seed Necessary Data
+
+In order to debug the data itself. We need to seed the example form and fake datapoints
+
+### Seed the example form
+
+```bash
+docker compose exec backend python manage.py gateway_form_seeder -f ./backend/source/forms/1.json
+```
+
+### Seed fake datapoints
+
+```bash
+docker compose exec backend python manage.py fake_gateway_data_seeder -r 100
+```
+
+## Teardown
+
+To properly shut down the container and clean up the resources, use the following command:
+
+```bash
+docker compose down -v
+```
